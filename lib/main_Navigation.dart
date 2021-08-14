@@ -126,7 +126,7 @@ int neighbourid;
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
         unselectedItemColor: Theme.of(context).unselectedWidgetColor,
-        selectedItemColor: Theme.of(context).primaryColor,
+        selectedItemColor: Theme.of(context).primaryColorDark,
         showUnselectedLabels: true,
         onTap: _onItemTapped,
       ),
