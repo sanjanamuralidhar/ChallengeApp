@@ -25,6 +25,7 @@ class _BookMarkedState extends State<BookMarked> {
       DetailModel user = DetailModel.fromJson(await sharedPref.read("user"));
       print(user);
       print('bla bla bla');
+      print('bla bla bla');
       Scaffold.of(context).showSnackBar(SnackBar(
           content: new Text("Loaded!"),
           duration: const Duration(milliseconds: 500)));
