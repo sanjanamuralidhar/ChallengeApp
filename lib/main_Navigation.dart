@@ -82,7 +82,7 @@ int neighbourid;
         ),
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.card_giftcard),
+        icon: Icon(Icons.add_box_outlined),
         // ignore: deprecated_member_use
         title: Padding(
           padding: EdgeInsets.only(top: 3),
@@ -90,7 +90,7 @@ int neighbourid;
         ),
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.favorite),
+        icon: Icon(Icons.bookmark_border),
         // ignore: deprecated_member_use
         title: Padding(
           padding: EdgeInsets.only(top: 3),
@@ -117,8 +117,8 @@ int neighbourid;
               HomePage(),
               // WishList(),
               // MessageList(),
-              // NotificationList(),
-              // auth is AuthenticationSuccess ? Profile() : SignIn(),
+              // BookMarked(),
+              // Profile(),
             ],
           ),
       bottomNavigationBar: BottomNavigationBar(

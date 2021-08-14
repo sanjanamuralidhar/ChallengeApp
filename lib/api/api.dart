@@ -27,4 +27,10 @@ class Api implements ApiRepository {
     return CommentModel.listFromJson(result['comments']);
   }
 
+  
+  static Future<List<DetailModel>> getCartItem() async {
+    final result = await UtilAsset.loadJson("assets/data/cartItems.json");
+    return DetailModel.listFromJson(result['data']['CartItems']);
+  }
+
 }

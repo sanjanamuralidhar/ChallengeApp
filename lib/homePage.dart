@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'Model/detailModel.dart';
+import 'api/api.dart';
 import 'bloc/BlocDetail/bloc.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,55 +14,23 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class TodoList {
-  List<TodoItem> items = [];
-
-  toJSONEncodable() {
-    return items.map((item) {
-      return item.toJSONEncodable();
-    }).toList();
-  }
-}
-
-class TodoItem {
-  String title;
-  bool done;
-
-  TodoItem({this.title, this.done});
-
-  toJSONEncodable() {
-    Map<String, dynamic> m = new Map();
-
-    m['title'] = title;
-    m['done'] = done;
-
-    return m;
-  }
-}
-
 class _HomePageState extends State<HomePage> {
   DetailBloc detailBloc;
   bool pressed = false;
-  final LocalStorage storage = new LocalStorage('some_key');
-  final TodoList list = new TodoList();
-
+  List<DetailModel> _bookMarked;
 
   @override
   void initState() {
     detailBloc = BlocProvider.of<DetailBloc>(context);
     detailBloc.add(FetchDetailEvent());
+    _loadCartItem();
     super.initState();
   }
 
-  _saveToStorage() {
-    storage.setItem('todos', list.toJSONEncodable());
-  }
-
-   _addItem(String title) {
+  Future<void> _loadCartItem() async {
+    final List<DetailModel> result = await Api.getCartItem();
     setState(() {
-      final item = new TodoItem(title: title, done: false);
-      list.items.add(item);
-      _saveToStorage();
+      _bookMarked = result;
     });
   }
 
@@ -145,8 +114,11 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     Spacer(),
-                    Icon(
-                      Icons.more_vert,
+                    InkWell(
+                      onTap: () => _onOpenMore(),
+                      child: Icon(
+                        Icons.more_vert,
+                      ),
                     ),
                   ],
                 ),
@@ -175,22 +147,31 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Spacer(),
                     InkWell(
-                      onTap: (){
-                        setState(() {
-                          pressed = !pressed;
-                           _addItem(item.id);
-                        });
-                      },
-                      child:pressed?Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.bookmark),
-                    ):Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.bookmark_border),
-                    )
+                        onTap: () {
+                          setState(() {
+                            pressed = !pressed;
+                          });
+                          if(pressed==true){
+                            setState(() {
+                              _bookMarked.add(item);
+                            });
+                          }
+                          if(pressed == false){
+                            setState(() {
+                              _bookMarked.remove(item);
 
-                    )
-                    
+                            });
+                          }
+                        },
+                        child: pressed
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(Icons.bookmark),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(Icons.bookmark_border),
+                              ))
                   ],
                 ),
                 Row(
@@ -231,6 +212,47 @@ class _HomePageState extends State<HomePage> {
               ],
             ));
           }),
+    );
+  }
+
+  void _onOpenMore() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+          height: MediaQuery.of(context).size.height*.40,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Report'),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Turn on Post Notification'),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Copy Link'),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Share To'),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Un follow'),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Mute'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
