@@ -1,179 +1,131 @@
-// import 'package:flutter/foundation.dart';
-// import 'package:flutter/material.dart';
+import 'package:ChallengeApp/Model/detailModel.dart';
+import 'package:flutter/material.dart';
+import 'configs/sharedPref.dart';
 
-// import 'package:localstorage/localstorage.dart';
+class Demo extends StatefulWidget {
+  @override
+  DemoView createState() {
+    return DemoView();
+  }
+}
 
-// void main() {
-//   runApp(new MyApp());
-// }
+class DemoView extends State<Demo> {
+  SharedPref sharedPref = SharedPref();
+  DetailModel userSave = DetailModel();
+  DetailModel userLoad = DetailModel();
 
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return new MaterialApp(
-//       title: 'Localstorage Demo',
-//       theme: new ThemeData(
-//         primarySwatch: Colors.blue,
-//       ),
-//       home: new HomePage(),
-//     );
-//   }
-// }
+  loadSharedPrefs() async {
+    try {
+      DetailModel user = DetailModel.fromJson(await sharedPref.read("user"));
+      Scaffold.of(context).showSnackBar(SnackBar(
+          content: new Text("Loaded!"),
+          duration: const Duration(milliseconds: 500)));
+      setState(() {
+        userLoad = user;
+      });
+    } catch (Excepetion) {
+      Scaffold.of(context).showSnackBar(SnackBar(
+          content: new Text("Nothing found!"),
+          duration: const Duration(milliseconds: 500)));
+    }
+  }
 
-// class HomePage extends StatefulWidget {
-//   HomePage({Key? key}) : super(key: key);
-
-//   @override
-//   _MyHomePageState createState() => new _MyHomePageState();
-// }
-
-// class TodoItem {
-//   String title;
-//   bool done;
-
-//   TodoItem({required this.title, required this.done});
-
-//   toJSONEncodable() {
-//     Map<String, dynamic> m = new Map();
-
-//     m['title'] = title;
-//     m['done'] = done;
-
-//     return m;
-//   }
-// }
-
-// class TodoList {
-//   List<TodoItem> items = [];
-
-//   toJSONEncodable() {
-//     return items.map((item) {
-//       return item.toJSONEncodable();
-//     }).toList();
-//   }
-// }
-
-// class _MyHomePageState extends State<HomePage> {
-//   final TodoList list = new TodoList();
-//   final LocalStorage storage = new LocalStorage('todo_app');
-//   bool initialized = false;
-//   TextEditingController controller = new TextEditingController();
-
-//   _toggleItem(TodoItem item) {
-//     setState(() {
-//       item.done = !item.done;
-//       _saveToStorage();
-//     });
-//   }
-
-//   _addItem(String title) {
-//     setState(() {
-//       final item = new TodoItem(title: title, done: false);
-//       list.items.add(item);
-//       _saveToStorage();
-//     });
-//   }
-
-//   _saveToStorage() {
-//     storage.setItem('todos', list.toJSONEncodable());
-//   }
-
-//   _clearStorage() async {
-//     await storage.clear();
-
-//     setState(() {
-//       list.items = storage.getItem('todos') ?? [];
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return new Scaffold(
-//       appBar: new AppBar(
-//         title: new Text('Localstorage demo'),
-//       ),
-//       body: Container(
-//           padding: EdgeInsets.all(10.0),
-//           constraints: BoxConstraints.expand(),
-//           child: FutureBuilder(
-//             future: storage.ready,
-//             builder: (BuildContext context, AsyncSnapshot snapshot) {
-//               if (snapshot.data == null) {
-//                 return Center(
-//                   child: CircularProgressIndicator(),
-//                 );
-//               }
-
-//               if (!initialized) {
-//                 var items = storage.getItem('todos');
-
-//                 if (items != null) {
-//                   list.items = List<TodoItem>.from(
-//                     (items as List).map(
-//                       (item) => TodoItem(
-//                         title: item['title'],
-//                         done: item['done'],
-//                       ),
-//                     ),
-//                   );
-//                 }
-
-//                 initialized = true;
-//               }
-
-//               List<Widget> widgets = list.items.map((item) {
-//                 return CheckboxListTile(
-//                   value: item.done,
-//                   title: Text(item.title),
-//                   selected: item.done,
-//                   onChanged: (_) {
-//                     _toggleItem(item);
-//                   },
-//                 );
-//               }).toList();
-
-//               return Column(
-//                 children: <Widget>[
-//                   Expanded(
-//                     flex: 1,
-//                     child: ListView(
-//                       children: widgets,
-//                       itemExtent: 50.0,
-//                     ),
-//                   ),
-//                   ListTile(
-//                     title: TextField(
-//                       controller: controller,
-//                       decoration: InputDecoration(
-//                         labelText: 'What to do?',
-//                       ),
-//                       onEditingComplete: _save,
-//                     ),
-//                     trailing: Row(
-//                       mainAxisSize: MainAxisSize.min,
-//                       children: <Widget>[
-//                         IconButton(
-//                           icon: Icon(Icons.save),
-//                           onPressed: _save,
-//                           tooltip: 'Save',
-//                         ),
-//                         IconButton(
-//                           icon: Icon(Icons.delete),
-//                           onPressed: _clearStorage,
-//                           tooltip: 'Clear storage',
-//                         )
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               );
-//             },
-//           )),
-//     );
-//   }
-
-//   void _save() {
-//     _addItem(controller.value.text);
-//     controller.clear();
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: <Widget>[
+        Container(
+          height: 200.0,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Container(
+                  height: 50.0,
+                  width: 300.0,
+                  child: TextField(
+                    decoration: InputDecoration(hintText: "Name"),
+                    onChanged: (value) {
+                      setState(() {
+                        userSave.channelname = value;
+                      });
+                    },
+                  )),
+              Container(
+                  height: 50.0,
+                  width: 300.0,
+                  child: TextField(
+                    decoration: InputDecoration(hintText: "Age"),
+                    onChanged: (value) {
+                      setState(() {
+                        userSave.high_thumbnail = value;
+                      });
+                    },
+                  )),
+              Container(
+                  height: 50.0,
+                  width: 300.0,
+                  child: TextField(
+                    decoration: InputDecoration(hintText: "Location"),
+                    onChanged: (value) {
+                      setState(() {
+                        userSave.id = value;
+                      });
+                    },
+                  )),
+            ],
+          ),
+        ),
+        Container(
+          height: 80.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              RaisedButton(
+                onPressed: () {
+                  sharedPref.save("user", userSave);
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                      content: new Text("Saved!"),
+                      duration: const Duration(milliseconds: 500)));
+                },
+                child: Text('Save', style: TextStyle(fontSize: 20)),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  loadSharedPrefs();
+                },
+                child: Text('Load', style: TextStyle(fontSize: 20)),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  sharedPref.remove("user");
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                      content: new Text("Cleared!"),
+                      duration: const Duration(milliseconds: 500)));
+                  setState(() {
+                    userLoad = DetailModel();
+                  });
+                },
+                child: Text('Clear', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 300.0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Text("Name: " + (userLoad.id ?? ""),
+                  style: TextStyle(fontSize: 16)),
+              Text("Age: " + (userLoad.channelname?? ""),
+                  style: TextStyle(fontSize: 16)),
+              Text("Location: " + (userLoad.high_thumbnail ?? ""),
+                  style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

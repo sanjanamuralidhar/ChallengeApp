@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:ChallengeApp/comments.dart';
+import 'package:ChallengeApp/configs/sharedPref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Model/detailModel.dart';
 import 'api/api.dart';
@@ -18,21 +22,23 @@ class _HomePageState extends State<HomePage> {
   DetailBloc detailBloc;
   bool pressed = false;
   List<DetailModel> _bookMarked;
+  SharedPref sharedPref = SharedPref();
+  DetailModel userSave = DetailModel();
 
   @override
   void initState() {
     detailBloc = BlocProvider.of<DetailBloc>(context);
     detailBloc.add(FetchDetailEvent());
-    _loadCartItem();
+    // _loadCartItem();
     super.initState();
   }
 
-  Future<void> _loadCartItem() async {
-    final List<DetailModel> result = await Api.getCartItem();
-    setState(() {
-      _bookMarked = result;
-    });
-  }
+  // Future<void> _loadCartItem() async {
+  //   final List<DetailModel> result = await Api.getCartItem();
+  //   setState(() {
+  //     _bookMarked = result;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -153,12 +159,18 @@ class _HomePageState extends State<HomePage> {
                           });
                           if(pressed==true){
                             setState(() {
-                              _bookMarked.add(item);
+                              // userSave.channelname = item.channelname;
+                              sharedPref.save("user", item);
+                              //  sharedPref.save("user", userSave);
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                      content: new Text("Saved!"),
+                      duration: const Duration(milliseconds: 500)));
                             });
                           }
                           if(pressed == false){
                             setState(() {
-                              _bookMarked.remove(item);
+                              sharedPref.remove("user");
+                              // _bookMarked.remove(item);
 
                             });
                           }

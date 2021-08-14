@@ -8,7 +8,7 @@ class DetailModel{
   String medium_thumbnail;
   // List<String> tags;
 
-  DetailModel(
+  DetailModel({
     this.channelname,
     this.high_thumbnail,
     this.id,
@@ -16,7 +16,8 @@ class DetailModel{
     this.medium_thumbnail,
     // this.tags,
     this.title,
-  );
+  });
+  
    @override
   String toString() {
     return toJson().toString();

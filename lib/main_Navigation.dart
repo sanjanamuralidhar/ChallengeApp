@@ -1,8 +1,13 @@
 import 'dart:developer';
+import 'package:ChallengeApp/add.dart';
 import 'package:ChallengeApp/configs/application.dart';
 import 'package:ChallengeApp/homePage.dart';
+import 'package:ChallengeApp/profile.dart';
+import 'package:ChallengeApp/search.dart';
 import 'package:ChallengeApp/utils/utils.dart';
 import 'package:flutter/material.dart';
+
+import 'bookMarked.dart';
 
 // import 'api/api.dart';
 
@@ -115,10 +120,10 @@ int neighbourid;
             index: _selectedIndex,
             children: <Widget>[
               HomePage(),
-              // WishList(),
-              // MessageList(),
-              // BookMarked(),
-              // Profile(),
+              Search(),
+              Add(),
+              BookMarked(),
+              Profile(),
             ],
           ),
       bottomNavigationBar: BottomNavigationBar(
