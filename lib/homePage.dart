@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ChallengeApp/comments.dart';
 import 'package:ChallengeApp/configs/sharedPref.dart';
+import 'package:ChallengeApp/utils/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:localstorage/localstorage.dart';
@@ -19,17 +20,35 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String firstHalf;
+  String secondHalf;
+
+   List toggled = List();
+
+  bool flag = true;
+  final String description =
+    "this image is so wonderful. this reminds me of my childhood great experience i wonder why I posted this now.";
+
+
+	DatabaseHelper helper = DatabaseHelper();
   DetailBloc detailBloc;
   bool pressed = false;
   List<DetailModel> _bookMarked;
   SharedPref sharedPref = SharedPref();
-  DetailModel userSave = DetailModel();
+  // DetailModel userSave = DetailModel();
+  DetailModel todo;
 
   @override
   void initState() {
     detailBloc = BlocProvider.of<DetailBloc>(context);
     detailBloc.add(FetchDetailEvent());
-    // _loadCartItem();
+     if (description.length > 50) {
+      firstHalf = description.substring(0, 50);
+      secondHalf = description.substring(50, description.length);
+    } else {
+      firstHalf = description;
+      secondHalf = "";
+    }
     super.initState();
   }
 
@@ -153,29 +172,29 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Spacer(),
                     InkWell(
+                      
                         onTap: () {
+                          pressed =! pressed;
+                           setState(() {
+                        
+                        if (pressed==true && detail.contains(item)) {
                           setState(() {
-                            pressed = !pressed;
-                          });
-                          if(pressed==true){
-                            setState(() {
-                              // userSave.channelname = item.channelname;
-                              sharedPref.save("user", item);
-                              //  sharedPref.save("user", userSave);
-                  Scaffold.of(context).showSnackBar(SnackBar(
+                            toggled.add(item);
+                            sharedPref.save("user", item);
+                             Scaffold.of(context).showSnackBar(SnackBar(
                       content: new Text("Saved!"),
                       duration: const Duration(milliseconds: 500)));
-                            });
-                          }
-                          if(pressed == false){
-                            setState(() {
-                              sharedPref.remove("user");
-                              // _bookMarked.remove(item);
-
-                            });
-                          }
+                          });
+                        } else if (pressed==false && toggled.contains(item)) {
+                          toggled.remove(item);
+                         sharedPref.remove("user");
+                         Scaffold.of(context).showSnackBar(SnackBar(
+                      content: new Text("Removed!"),
+                      duration: const Duration(milliseconds: 500)));
+                        }
+                      });
                         },
-                        child: pressed
+                        child: toggled.contains(item)
                             ? Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Icon(Icons.bookmark),
@@ -183,7 +202,8 @@ class _HomePageState extends State<HomePage> {
                             : Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Icon(Icons.bookmark_border),
-                              ))
+                              )
+                        )
                   ],
                 ),
                 Row(
@@ -194,16 +214,50 @@ class _HomePageState extends State<HomePage> {
                         backgroundImage: NetworkImage(item.low_thumbnail),
                       ),
                     ),
-                    Row(
-                      children: [
-                        Text('Liked By '),
+                    Row(children: [
+                      Text('Liked By '),
                         Text('neeharika_boda'),
                         Text('and'),
-                        Text('62,707 others')
-                      ],
-                    ),
+                        Text('62,707 others'),
+                    ],),
+                  
                   ],
                 ),
+                  Row(
+                      children: [
+                        // Text('Liked By '),
+                        // Text('neeharika_boda'),
+                        // Text('and'),
+                        // Text('62,707 others'),
+                        Container(
+                          width:MediaQuery.of(context).size.width*1,
+      padding: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+      child: secondHalf.isEmpty
+          ? new Text(firstHalf)
+          : new Column(
+              children: <Widget>[
+                new Text(flag ? (firstHalf + "...") : (firstHalf + secondHalf)),
+                new InkWell(
+                  child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      new Text(
+                        flag ? "show more" : "show less",
+                        style: new TextStyle(color: Colors.blue),
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    setState(() {
+                      flag = !flag;
+                    });
+                  },
+                ),
+              ],
+            ),
+    ),
+                      ],
+                    ),
                 Row(
                   children: [
                     GestureDetector(
@@ -226,6 +280,26 @@ class _HomePageState extends State<HomePage> {
           }),
     );
   }
+
+  void _save() async {
+
+		// moveToLastScreen();
+
+		// todo.date = DateFormat.yMMMd().format(DateTime.now());
+		int result;
+		if (todo.id != null) {  // Case 1: Update operation
+			result = await helper.updateTodo(todo);
+		} else { // Case 2: Insert Operation
+			result = await helper.insertTodo(todo);
+		}
+
+		// if (result != 0) {  // Success
+		// 	_showAlertDialog('Status', 'Todo Saved Successfully');
+		// } else {  // Failure
+		// 	_showAlertDialog('Status', 'Problem Saving Todo');
+		// }
+
+	}
 
   void _onOpenMore() {
     showModalBottomSheet<void>(

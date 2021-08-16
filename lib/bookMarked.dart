@@ -41,16 +41,25 @@ class _BookMarkedState extends State<BookMarked> {
 
   @override
   Widget build(BuildContext context) {
-     DetailModel userload = userLoad == null ? [] : userLoad;
+     
     return Scaffold(
       appBar: AppBar(title: Text('BookMark'),),
-      body: Container(
+      body: _buildBody(context),
+      
+    );
+  }
+
+  Widget _buildBody(BuildContext context){
+    print(userLoad);
+    DetailModel userload = userLoad == null ? [] : userLoad;
+    if(userload.id == null){
+      Container(child: Text('no data available to show'));}
+      else return Container(
         child:SizedBox(
                   // height: MediaQuery.of(context).size.height*.50,
                   width: MediaQuery.of(context).size.width * 1,
                   child: Image.network(userload.medium_thumbnail),
                 ),
-      ),
-    );
+      );
   }
 }
