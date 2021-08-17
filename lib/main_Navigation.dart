@@ -1,10 +1,9 @@
-import 'dart:developer';
+
 import 'package:ChallengeApp/add.dart';
-import 'package:ChallengeApp/configs/application.dart';
+import 'package:ChallengeApp/favoritepage.dart';
 import 'package:ChallengeApp/homePage.dart';
 import 'package:ChallengeApp/profile.dart';
 import 'package:ChallengeApp/search.dart';
-import 'package:ChallengeApp/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 import 'bookMarked.dart';
@@ -95,7 +94,7 @@ int neighbourid;
         ),
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.bookmark_border),
+        icon: Icon(Icons.favorite),
         // ignore: deprecated_member_use
         title: Padding(
           padding: EdgeInsets.only(top: 3),
@@ -122,7 +121,7 @@ int neighbourid;
               HomePage(),
               Search(),
               Add(),
-              BookMarked(),
+              Favorite(),
               Profile(),
             ],
           ),

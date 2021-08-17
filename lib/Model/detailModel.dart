@@ -44,29 +44,6 @@ class DetailModel{
     return json;
   }
 
-  Map<String, dynamic> toMap() {
-
-		var map = Map<String, dynamic>();
-		map['id'] = id;
-		map['channelname'] = channelname;
-		map['high thumbnail'] = high_thumbnail;
-		map['low thumbnail'] = low_thumbnail;
-    map['medium thumbnail '] = medium_thumbnail;
-    map['title'] = title;
-
-		return map;
-	}
-
-	// Extract a Note object from a Map object
-	DetailModel.fromMapObject(Map<String, dynamic> map) {
-		this.id = map['id'];
-		this.channelname = map['channelname'];
-		this.high_thumbnail = map['high_thumbnail'];
-    this.low_thumbnail = map['low_thumbnail'];
-		this.medium_thumbnail = map['medium_thumbnail'];
-    this.title = map['title'];
-	}
-
   static List<DetailModel> listFromJson(List<dynamic> json) {
     return json == null
     ? List<DetailModel>()

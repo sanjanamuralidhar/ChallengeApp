@@ -1,5 +1,4 @@
 import 'package:ChallengeApp/Model/commentModel.dart';
-import 'package:ChallengeApp/Model/detailModel.dart';
 import 'package:ChallengeApp/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

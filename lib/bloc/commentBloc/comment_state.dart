@@ -1,5 +1,4 @@
 import 'package:ChallengeApp/Model/commentModel.dart';
-import 'package:ChallengeApp/Model/detailModel.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 

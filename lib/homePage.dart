@@ -1,20 +1,17 @@
-import 'dart:convert';
+
 
 import 'package:ChallengeApp/comments.dart';
 import 'package:ChallengeApp/configs/sharedPref.dart';
-import 'package:ChallengeApp/utils/database_helper.dart';
+import 'package:ChallengeApp/mainMenu.dart';
+import 'package:ChallengeApp/service/category_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:localstorage/localstorage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Model/Categorymodel.dart';
 import 'Model/detailModel.dart';
-import 'api/api.dart';
 import 'bloc/BlocDetail/bloc.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key key}) : super(key: key);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -22,27 +19,28 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String firstHalf;
   String secondHalf;
+  var _category = Category();
+  var _categoryService = CategoryService();
 
-   List toggled = List();
+  List toggled = List();
 
   bool flag = true;
   final String description =
-    "this image is so wonderful. this reminds me of my childhood great experience i wonder why I posted this now.";
+      "this image is so wonderful. this reminds me of my childhood great experience i wonder why I posted this now.";
 
-
-	DatabaseHelper helper = DatabaseHelper();
   DetailBloc detailBloc;
   bool pressed = false;
   List<DetailModel> _bookMarked;
   SharedPref sharedPref = SharedPref();
   // DetailModel userSave = DetailModel();
   DetailModel todo;
+  List<Category> _categoryList = List<Category>();
 
   @override
   void initState() {
     detailBloc = BlocProvider.of<DetailBloc>(context);
     detailBloc.add(FetchDetailEvent());
-     if (description.length > 50) {
+    if (description.length > 50) {
       firstHalf = description.substring(0, 50);
       secondHalf = description.substring(50, description.length);
     } else {
@@ -52,16 +50,10 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
-  // Future<void> _loadCartItem() async {
-  //   final List<DetailModel> result = await Api.getCartItem();
-  //   setState(() {
-  //     _bookMarked = result;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: MainMenu(),
       appBar: AppBar(
         title: Row(children: [
           Padding(
@@ -119,6 +111,7 @@ class _HomePageState extends State<HomePage> {
           itemCount: detail.length,
           itemBuilder: (context, index) {
             final item = detail[index];
+            bool isSaved = toggled.contains(item);
             return Container(
                 child: Column(
               children: [
@@ -172,27 +165,22 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Spacer(),
                     InkWell(
-                      
-                        onTap: () {
-                          pressed =! pressed;
-                           setState(() {
-                        
-                        if (pressed==true && detail.contains(item)) {
-                          setState(() {
-                            toggled.add(item);
-                            sharedPref.save("user", item);
-                             Scaffold.of(context).showSnackBar(SnackBar(
-                      content: new Text("Saved!"),
-                      duration: const Duration(milliseconds: 500)));
+                        onTap: ()  {
+                          setState(()  {
+                            if (isSaved) {
+                              toggled.remove(item);
+                              _categoryService.deleteCategory(item.channelname);
+                            } else {
+                              toggled.add(item);
+                              _category.channelname = item.channelname;
+                              _category.title = item.title;
+                              _category.high_thumbnail = item.high_thumbnail;
+                              _category.medium_thumbnail =
+                                  item.medium_thumbnail;
+                              _category.low_thumbnail = item.low_thumbnail;
+                              _categoryService.saveCategory(_category);
+                            }
                           });
-                        } else if (pressed==false && toggled.contains(item)) {
-                          toggled.remove(item);
-                         sharedPref.remove("user");
-                         Scaffold.of(context).showSnackBar(SnackBar(
-                      content: new Text("Removed!"),
-                      duration: const Duration(milliseconds: 500)));
-                        }
-                      });
                         },
                         child: toggled.contains(item)
                             ? Padding(
@@ -202,8 +190,7 @@ class _HomePageState extends State<HomePage> {
                             : Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Icon(Icons.bookmark_border),
-                              )
-                        )
+                              ))
                   ],
                 ),
                 Row(
@@ -214,50 +201,55 @@ class _HomePageState extends State<HomePage> {
                         backgroundImage: NetworkImage(item.low_thumbnail),
                       ),
                     ),
-                    Row(children: [
-                      Text('Liked By '),
+                    Row(
+                      children: [
+                        Text('Liked By '),
                         Text('neeharika_boda'),
                         Text('and'),
                         Text('62,707 others'),
-                    ],),
-                  
-                  ],
-                ),
-                  Row(
-                      children: [
-                        // Text('Liked By '),
-                        // Text('neeharika_boda'),
-                        // Text('and'),
-                        // Text('62,707 others'),
-                        Container(
-                          width:MediaQuery.of(context).size.width*1,
-      padding: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-      child: secondHalf.isEmpty
-          ? new Text(firstHalf)
-          : new Column(
-              children: <Widget>[
-                new Text(flag ? (firstHalf + "...") : (firstHalf + secondHalf)),
-                new InkWell(
-                  child: new Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      new Text(
-                        flag ? "show more" : "show less",
-                        style: new TextStyle(color: Colors.blue),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    setState(() {
-                      flag = !flag;
-                    });
-                  },
-                ),
-              ],
-            ),
-    ),
                       ],
                     ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    // Text('Liked By '),
+                    // Text('neeharika_boda'),
+                    // Text('and'),
+                    // Text('62,707 others'),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 1,
+                      padding: new EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 10.0),
+                      child: secondHalf.isEmpty
+                          ? new Text(firstHalf)
+                          : new Column(
+                              children: <Widget>[
+                                new Text(flag
+                                    ? (firstHalf + "...")
+                                    : (firstHalf + secondHalf)),
+                                new InkWell(
+                                  child: new Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      new Text(
+                                        flag ? "show more" : "show less",
+                                        style:
+                                            new TextStyle(color: Colors.blue),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      flag = !flag;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
                 Row(
                   children: [
                     GestureDetector(
@@ -281,33 +273,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _save() async {
-
-		// moveToLastScreen();
-
-		// todo.date = DateFormat.yMMMd().format(DateTime.now());
-		int result;
-		if (todo.id != null) {  // Case 1: Update operation
-			result = await helper.updateTodo(todo);
-		} else { // Case 2: Insert Operation
-			result = await helper.insertTodo(todo);
-		}
-
-		// if (result != 0) {  // Success
-		// 	_showAlertDialog('Status', 'Todo Saved Successfully');
-		// } else {  // Failure
-		// 	_showAlertDialog('Status', 'Problem Saving Todo');
-		// }
-
-	}
-
   void _onOpenMore() {
     showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
         return Container(
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-          height: MediaQuery.of(context).size.height*.40,
+          height: MediaQuery.of(context).size.height * .40,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -342,3 +314,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+//     pressed =! pressed;
+//      setState(() {
+
+//   if (pressed==true && detail.contains(item)) {
+//     setState(() {
+//       toggled.add(item);
+//        Scaffold.of(context).showSnackBar(SnackBar(
+// content: new Text("Saved!"),
+// duration: const Duration(milliseconds: 500)));
+//     });
+//   } else if (pressed==false && toggled.contains(item)) {
+//     toggled.remove(item);
+//    Scaffold.of(context).showSnackBar(SnackBar(
+// content: new Text("Removed!"),
+// duration: const Duration(milliseconds: 500)));
+//   }
+// });
